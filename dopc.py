@@ -12,10 +12,22 @@ orders = {
     }
 }
 
+venues = [
+    "home-assignment-venue-helsinki",
+    "home-assignment-venue-stockholm",
+    "home-assignment-venue-berlin",
+    "home-assignment-venue-tokyo",
+]
+
 
 @app.get("/api/v1/delivery-order-price")
 def delivery_order_price(*, venue_slug: str, cart_value: int, user_lat: float, user_lon: float):  # fmt:skip
-    venue_data = get_venue_data(venue_slug)
+    for venue_name in venues:
+        if venue_slug == venue_name:
+            venue_data = get_venue_data(venue_slug)
+        else:
+            return {"Error": "No match for queried venue"}
+        
 
     return {
         "total_price": None,
@@ -104,3 +116,4 @@ print(get_venue_data("home-assignment-venue-berlin")[1])
 # TODO get Fonseca to proof check my math
 # TODO one of the coordinates isn't supposed to be processed as a list (in endpoint)
 # TODO correct Haversine
+# TODO correct endpoint Path
