@@ -32,6 +32,12 @@ def delivery_order_price(*, venue_slug: str, cart_value: int, user_lat: float, u
 
     distance = get_distance(venue_data["venue_coordinates"], [user_lat, user_lon])
 
+    delivery_fee = get_delivery_fee(
+        venue_data["base_price_for_delivery"],
+        distance,
+        venue_data["distance_ranges_for_delivery"],
+    )
+
     return {
         "total_price": None,
         "small_order_surcharge": None,
@@ -87,7 +93,7 @@ def get_venue_data(venue_slug: str):
     }
 
 
-def get_fee(base_price, distance, venue_a, venue_b):
+def get_delivery_fee(base_price, distance, distance_ranges):
     """
     The function calculates the total fee for a delivery. It takes into
     consideration the different delivery ranges, which modify the calculation.
@@ -95,6 +101,7 @@ def get_fee(base_price, distance, venue_a, venue_b):
         int: The total cost of the delivery in the lowest denomination of
         the local currency.
     """
+    # TODO extract venue_a and venue_b from distance ranges
     fee = base_price + venue_a + round(venue_b * distance / 10)
     return fee
 
@@ -125,7 +132,7 @@ def get_fee(base_price, distance, venue_a, venue_b):
 # )
 
 # print(get_venue_data("home-assignment-venue-berlin")[1])
-print(get_fee(199, 600, 100, 1.555))
+print(get_delivery_fee(199, 600, 100, 1.555))
 
 # DONE enable Github for version control (not public)
 # TODO before any request check that the response is 200
