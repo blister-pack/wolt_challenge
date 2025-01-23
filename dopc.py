@@ -101,7 +101,15 @@ def get_delivery_fee(base_price, distance, distance_ranges):
         int: The total cost of the delivery in the lowest denomination of
         the local currency.
     """
+    for distance_range in distance_ranges:
+        if distance_range["max"] == 0:
+            return {"Error 400": "Distance exceeds maximum allowed"}
+        elif distance <= distance_range["max"]:
+            venue_a = distance_range["a"]
+            venue_b = distance_range["b"]
+        continue
     # TODO extract venue_a and venue_b from distance ranges
+    # TODO if distance exceeds limit, return error!
     fee = base_price + venue_a + round(venue_b * distance / 10)
     return fee
 
@@ -143,3 +151,4 @@ print(get_delivery_fee(199, 600, 100, 1.555))
 # TODO document get_venue_data
 # TODO endpoint should return error 400 if something is not possible
 # TODO get_fee should take ranges into consideration
+# TODO remember small order surcharge can never be negative
