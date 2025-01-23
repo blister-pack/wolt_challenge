@@ -77,12 +77,12 @@ def get_venue_data(venue_slug: str):
     base_price_for_delivery = requests.get(dynamic_url).json()["venue_raw"]["delivery_specs"]["delivery_pricing"]["base_price"]  # fmt:skip
     distance_ranges_for_delivery = requests.get(dynamic_url).json()["venue_raw"]["delivery_specs"]["delivery_pricing"]["distance_ranges"]  # fmt:skip
 
-    return (
-        venue_coordinates,
-        order_minimum_no_surcharge,
-        base_price_for_delivery,
-        distance_ranges_for_delivery,
-    )
+    return {
+        "venue_coordinates": venue_coordinates,
+        "order_minimum_no_surcharge": order_minimum_no_surcharge,
+        "base_price_for_delivery": base_price_for_delivery,
+        "distance_ranges_for_delivery": distance_ranges_for_delivery,
+    }
 
 
 # is this supposed to be hardcoded or should it be able to take more endpoints?
