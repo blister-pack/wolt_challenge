@@ -1,0 +1,104 @@
+from fastapi import FastAPI
+from pydantic import BaseModel
+import requests
+import math
+
+app = FastAPI()
+
+user_order1 = {
+    "cart_value": 1200,
+    "coordinates": [18.6454235, 57.2847234],
+}
+
+
+@app.get("/api/v1/delivery-order-price")
+def delivery_order_price(*, venue_slug: str, cart_value: int, user_lat: float, user_lon: float):  # fmt:skip
+    venue_data = get_venue_data(venue_slug)
+
+    return {
+        "total_price": None,
+        "small_order_surcharge": None,
+        "cart_value": None,
+        "delivery": {
+            "fee": None,
+            "distance": None,
+        },
+    }
+
+
+def get_distance(user_coordinates: list, venue_coordinates: list):
+    """
+    The function uses the Haversine formula to calculate the distance between
+    two points using their coordinates (latitude and longitude).
+    Returns:
+        float: The distance between the two points in meters.
+    """
+
+    user_lat, user_lon = user_coordinates
+    venue_lat, venue_lon = venue_coordinates
+
+    EARTH_RADIUS = 6371 * (10**3)  # earth radius in meters
+
+    user_lat_radians = math.radians(user_lat)
+    venue_lat_radians = math.radians(venue_lat)
+    delta_lat = venue_lat_radians - user_lat_radians
+    delta_lon = math.radians(venue_lon - user_lon)
+
+    aux = (
+        math.sin(delta_lat / 2) ** 2
+        + math.cos(user_lat) * math.cos(venue_lat) * math.sin(delta_lon / 2) ** 2
+    )
+
+    return EARTH_RADIUS * 2 * math.asin(math.sqrt(aux))
+
+
+def get_venue_data(venue_slug: str):
+    venue_slug = venue_slug.split("-")[-1]
+    static_url = f"https://consumer-api.development.dev.woltapi.com/home-assignment-api/v1/venues/home-assignment-venue-{venue_slug}/static"
+    dynamic_url = f"https://consumer-api.development.dev.woltapi.com/home-assignment-api/v1/venues/home-assignment-venue-{venue_slug}/dynamic"
+
+    venue_coordinates = requests.get(static_url).json()["venue_raw"]["location"]["coordinates"]  # fmt: skip
+    order_minimum_no_surcharge = requests.get(dynamic_url).json()["venue_raw"]["delivery_specs"]["order_minimum_no_surcharge"]  # fmt: skip
+    base_price_for_delivery = requests.get(dynamic_url).json()["venue_raw"]["delivery_specs"]["delivery_pricing"]["base_price"]  # fmt:skip
+    distance_ranges_for_delivery = requests.get(dynamic_url).json()["venue_raw"]["delivery_specs"]["delivery_pricing"]["distance_ranges"]  # fmt:skip
+
+    return (
+        venue_coordinates,
+        order_minimum_no_surcharge,
+        base_price_for_delivery,
+        distance_ranges_for_delivery,
+    )
+
+
+# is this supposed to be hardcoded or should it be able to take more endpoints?
+# venue_location = requests.get(
+#     "https://consumer-api.development.dev.woltapi.com/home-assignment-api/v1/venues/home-assignment-venue-berlin/static"
+# )
+# print(venue_location.json()["venue_raw"]["location"]["coordinates"])
+
+# venue_dynamic = requests.get(
+#     "https://consumer-api.development.dev.woltapi.com/home-assignment-api/v1/venues/home-assignment-venue-berlin/dynamic"
+# )
+# delivery_specs = venue_dynamic.json()["venue_raw"]["delivery_specs"]
+# order_minimum_no_surcharge = delivery_specs["order_minimum_no_surcharge"]
+# base_price_for_delivery = delivery_specs["delivery_pricing"]["base_price"]
+# distance_ranges_for_delivery = delivery_specs["delivery_pricing"]["distance_ranges"]
+
+# print(
+#     f"{order_minimum_no_surcharge}\n{base_price_for_delivery}\n{distance_ranges_for_delivery}"
+# )
+
+# print(
+#     get_distance(
+#         user_order1["coordinates"],
+#         venue_location.json()["venue_raw"]["location"]["coordinates"],
+#     )
+# )
+
+print(get_venue_data("home-assignment-venue-berlin")[1])
+
+# TODO enable Github for version control (not public)
+# TODO before any request check that the response is 200
+# TODO get Fonseca to proof check my math
+# TODO one of the coordinates isn't supposed to be processed as a list (in endpoint)
+# TODO correct Haversine
