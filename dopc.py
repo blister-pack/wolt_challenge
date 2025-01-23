@@ -22,6 +22,7 @@ venues = [
 
 @app.get("/api/v1/delivery-order-price")
 def delivery_order_price(*, venue_slug: str, cart_value: int, user_lat: float, user_lon: float):  # fmt:skip
+    match_found = False
     for venue_name in venues:
         if venue_slug == venue_name:
             venue_data = get_venue_data(venue_slug)
