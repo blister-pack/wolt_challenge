@@ -25,9 +25,9 @@ def delivery_order_price(*, venue_slug: str, cart_value: int, user_lat: float, u
     for venue_name in venues:
         if venue_slug == venue_name:
             venue_data = get_venue_data(venue_slug)
-        else:
-            return {"Error": "No match for queried venue"}
-        
+            match_found = True
+    if not match_found:
+        return {"Error": "No match for queried venue"}
 
     return {
         "total_price": None,
