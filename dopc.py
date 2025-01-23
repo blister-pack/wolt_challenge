@@ -30,13 +30,15 @@ def delivery_order_price(*, venue_slug: str, cart_value: int, user_lat: float, u
     if not match_found:
         return {"Error": "No match for queried venue"}
 
+    distance = get_distance(venue_data["venue_coordinates"], [user_lat, user_lon])
+
     return {
         "total_price": None,
         "small_order_surcharge": None,
-        "cart_value": None,
+        "cart_value": cart_value,
         "delivery": {
             "fee": None,
-            "distance": None,
+            "distance": distance,
         },
     }
 
@@ -85,6 +87,18 @@ def get_venue_data(venue_slug: str):
     }
 
 
+def get_fee(base_price, distance, venue_a, venue_b):
+    """
+    The function calculates the total fee for a delivery. It takes into
+    consideration the different delivery ranges, which modify the calculation.
+    Returns:
+        int: The total cost of the delivery in the lowest denomination of
+        the local currency.
+    """
+    fee = base_price + venue_a + round(venue_b * distance / 10)
+    return fee
+
+
 # is this supposed to be hardcoded or should it be able to take more endpoints?
 # venue_location = requests.get(
 #     "https://consumer-api.development.dev.woltapi.com/home-assignment-api/v1/venues/home-assignment-venue-berlin/static"
@@ -110,11 +124,15 @@ def get_venue_data(venue_slug: str):
 #     )
 # )
 
-print(get_venue_data("home-assignment-venue-berlin")[1])
+# print(get_venue_data("home-assignment-venue-berlin")[1])
+print(get_fee(199, 600, 100, 1.555))
 
-# TODO enable Github for version control (not public)
+# DONE enable Github for version control (not public)
 # TODO before any request check that the response is 200
 # TODO get Fonseca to proof check my math
-# TODO one of the coordinates isn't supposed to be processed as a list (in endpoint)
+# DONE one of the coordinates isn't supposed to be processed as a list (in endpoint)
 # TODO correct Haversine
-# TODO correct endpoint Path
+# DONE correct endpoint Path
+# TODO document get_venue_data
+# TODO endpoint should return error 400 if something is not possible
+# TODO get_fee should take ranges into consideration
