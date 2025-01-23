@@ -5,9 +5,11 @@ import math
 
 app = FastAPI()
 
-user_order1 = {
-    "cart_value": 1200,
-    "coordinates": [18.6454235, 57.2847234],
+orders = {
+    1: {
+        "cart_value": 1200,
+        "coordinates": [18.6454235, 57.2847234],
+    }
 }
 
 
