@@ -143,7 +143,7 @@ def get_delivery_fee(base_price, distance, distance_ranges):
 # )
 
 # print(get_venue_data("home-assignment-venue-berlin")[1])
-print(get_delivery_fee(199, 600, 100, 1.555))
+# print(get_delivery_fee(199, 600, 100, 1.555))
 
 # DONE enable Github for version control (not public)
 # TODO before any request check that the response is 200
