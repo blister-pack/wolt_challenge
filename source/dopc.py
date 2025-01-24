@@ -48,7 +48,7 @@ def delivery_order_price(*, venue_slug: str, cart_value: int, user_lat: float, u
     )
 
     return {
-        "total_price": None,
+        "total_price": (small_order_surcharge + cart_value + delivery_fee),
         "small_order_surcharge": small_order_surcharge,
         "cart_value": cart_value,
         "delivery": {
@@ -126,7 +126,10 @@ def get_delivery_fee(base_price, distance, distance_ranges):
 
 
 def get_small_order_surcharge(order_minimum_no_surcharge: int, cart_value: int):
-    pass
+    small_order_surcharge = order_minimum_no_surcharge - cart_value
+    if small_order_surcharge < 0:
+        return 0
+    return small_order_surcharge
 
 
 # is this supposed to be hardcoded or should it be able to take more endpoints?
