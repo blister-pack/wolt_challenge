@@ -155,3 +155,4 @@ print(get_delivery_fee(199, 600, 100, 1.555))
 # TODO endpoint should return error 400 if something is not possible (is there a technicality here?)
 # TODO get_fee should take ranges into consideration
 # TODO remember small order surcharge can never be negative
+# TODO instructions on how to install and run

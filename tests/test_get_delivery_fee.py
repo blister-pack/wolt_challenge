@@ -21,11 +21,11 @@ def distance_ranges():
 @pytest.mark.parametrize(
     "distance, expected_fee",
     [
-        (200, None),
-        (700, None),
-        (1200, None),
-        (1700, None),
-        (2200, "Error"),
+        (200, 190),
+        (700, 290),
+        (1200, 390),
+        (1700, 560),
+        (2200, {"Error 400": "Distance exceeds maximum allowed"}),
     ],
 )
 def test_multiple_distance_ranges(base_price, distance_ranges, distance, expected_fee):  # fmt:skip
