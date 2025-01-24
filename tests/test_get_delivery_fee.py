@@ -2,10 +2,35 @@ import pytest
 from dopc import get_delivery_fee
 
 
+@pytest.fixture
+def base_price():
+    return 190
 
-@pytest.mark.parametrize()
-def test_multiple_distance_ranges():
-    pass
+
+@pytest.fixture
+def distance_ranges():
+    return [
+        {"min": 0, "max": 500, "a": 0, "b": 0},
+        {"min": 500, "max": 1000, "a": 100, "b": 0},
+        {"min": 1000, "max": 1500, "a": 200, "b": 0},
+        {"min": 1500, "max": 2000, "a": 200, "b": 1},
+        {"min": 2000, "max": 0, "a": 0, "b": 0},
+    ]
+
+
+@pytest.mark.parametrize(
+    "distance, expected_fee",
+    [
+        (200, None),
+        (700, None),
+        (1200, None),
+        (1700, None),
+        (2200, "Error"),
+    ],
+)
+def test_multiple_distance_ranges(base_price, distance_ranges, distance, expected_fee):  # fmt:skip
+    assert get_delivery_fee(base_price, distance, distance_ranges) == expected_fee
+
 
 # TODO put and test all venue data here
 # TODO create three tests - one for each delivery range

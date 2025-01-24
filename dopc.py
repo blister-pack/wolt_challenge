@@ -29,6 +29,7 @@ def delivery_order_price(*, venue_slug: str, cart_value: int, user_lat: float, u
             match_found = True
     if not match_found:
         return {"Error": "No match for queried venue"}
+    # TODO check if it works with an else instead of match_found
 
     distance = get_distance(venue_data["venue_coordinates"], [user_lat, user_lon])
 
@@ -80,8 +81,8 @@ def get_venue_data(venue_slug: str):
     static_url = f"https://consumer-api.development.dev.woltapi.com/home-assignment-api/v1/venues/home-assignment-venue-{venue_slug}/static"
     dynamic_url = f"https://consumer-api.development.dev.woltapi.com/home-assignment-api/v1/venues/home-assignment-venue-{venue_slug}/dynamic"
 
-    venue_coordinates = requests.get(static_url).json()["venue_raw"]["location"]["coordinates"]  # fmt: skip
-    order_minimum_no_surcharge = requests.get(dynamic_url).json()["venue_raw"]["delivery_specs"]["order_minimum_no_surcharge"]  # fmt: skip
+    venue_coordinates = requests.get(static_url).json()["venue_raw"]["location"]["coordinates"]  # fmt:skip
+    order_minimum_no_surcharge = requests.get(dynamic_url).json()["venue_raw"]["delivery_specs"]["order_minimum_no_surcharge"]  # fmt:skip
     base_price_for_delivery = requests.get(dynamic_url).json()["venue_raw"]["delivery_specs"]["delivery_pricing"]["base_price"]  # fmt:skip
     distance_ranges_for_delivery = requests.get(dynamic_url).json()["venue_raw"]["delivery_specs"]["delivery_pricing"]["distance_ranges"]  # fmt:skip
 
