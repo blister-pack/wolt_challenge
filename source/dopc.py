@@ -119,8 +119,6 @@ def get_delivery_fee(base_price, distance, distance_ranges):
             break
         elif distance_range["max"] == 0:
             return {"Error 400": "Distance exceeds maximum allowed"}
-    # TODO extract venue_a and venue_b from distance ranges
-    # TODO if distance exceeds limit, return error!
     fee = base_price + venue_a + round(venue_b * distance / 10)
     return fee
 
@@ -160,6 +158,7 @@ def get_small_order_surcharge(order_minimum_no_surcharge: int, cart_value: int):
 # print(get_venue_data("home-assignment-venue-berlin")[1])
 # print(get_delivery_fee(199, 600, 100, 1.555))
 
+# TODO endpoint should return error 400 if something is not possible (is there a technicality here?)
 # DONE enable Github for version control (not public)
 # TODO before any request check that the response is 200
 # TODO get Fonseca to proof check my math
@@ -167,7 +166,6 @@ def get_small_order_surcharge(order_minimum_no_surcharge: int, cart_value: int):
 # TODO correct Haversine
 # DONE correct endpoint Path
 # TODO document get_venue_data
-# TODO endpoint should return error 400 if something is not possible (is there a technicality here?)
 # TODO test endpoint
 # TODO get_fee should take ranges into consideration
 # TODO remember small order surcharge can never be negative
