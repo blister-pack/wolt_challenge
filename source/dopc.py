@@ -169,3 +169,5 @@ def get_small_order_surcharge(order_minimum_no_surcharge: int, cart_value: int):
 # TODO get_fee should take ranges into consideration
 # TODO remember small order surcharge can never be negative
 # TODO instructions on how to install and run
+# TODO document tests (explain what each test is testing like for which range)
+# TODO complete functions with expected output and type hints
