@@ -1,5 +1,5 @@
 import pytest
-from dopc import get_delivery_fee
+from source.dopc import get_delivery_fee
 
 
 @pytest.fixture
