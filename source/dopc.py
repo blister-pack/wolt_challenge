@@ -31,7 +31,10 @@ def delivery_order_price(*, venue_slug: str, cart_value: int, user_lat: float, u
         return {"Error": "No match for queried venue"}
     # TODO check if it works with an else instead of match_found
 
-    distance = get_distance(venue_data["venue_coordinates"], [user_lat, user_lon])
+    distance = get_distance(
+        venue_data["venue_coordinates"],
+        [user_lat, user_lon],
+    )
 
     delivery_fee = get_delivery_fee(
         venue_data["base_price_for_delivery"],
@@ -39,12 +42,17 @@ def delivery_order_price(*, venue_slug: str, cart_value: int, user_lat: float, u
         venue_data["distance_ranges_for_delivery"],
     )
 
+    small_order_surcharge = get_small_order_surcharge(
+        venue_data["order_minimum_no_surcharge"],
+        cart_value,
+    )
+
     return {
         "total_price": None,
-        "small_order_surcharge": None,
+        "small_order_surcharge": small_order_surcharge,
         "cart_value": cart_value,
         "delivery": {
-            "fee": None,
+            "fee": delivery_fee,
             "distance": distance,
         },
     }
@@ -117,6 +125,10 @@ def get_delivery_fee(base_price, distance, distance_ranges):
     return fee
 
 
+def get_small_order_surcharge(order_minimum_no_surcharge: int, cart_value: int):
+    pass
+
+
 # is this supposed to be hardcoded or should it be able to take more endpoints?
 # venue_location = requests.get(
 #     "https://consumer-api.development.dev.woltapi.com/home-assignment-api/v1/venues/home-assignment-venue-berlin/static"
@@ -153,6 +165,7 @@ def get_delivery_fee(base_price, distance, distance_ranges):
 # DONE correct endpoint Path
 # TODO document get_venue_data
 # TODO endpoint should return error 400 if something is not possible (is there a technicality here?)
+# TODO test endpoint
 # TODO get_fee should take ranges into consideration
 # TODO remember small order surcharge can never be negative
 # TODO instructions on how to install and run
