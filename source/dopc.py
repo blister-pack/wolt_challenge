@@ -172,7 +172,7 @@ def get_total_price(cart_value: int, small_order_surcharge: int, delivery_fee: i
 # TODO get Fonseca to proof check my math
 # TODO correct Haversine
 # TODO document get_venue_data
-# TODO test get_venue_data
+# TODO test get_venue_data (with mocking)
 # TODO test endpoint
 # TODO instructions on how to install and run
 # TODO complete functions with expected output and type hints
