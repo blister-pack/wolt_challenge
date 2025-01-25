@@ -27,6 +27,13 @@ def distance_ranges():
         (1700, 560),
         (2200, {"Error 400": "Distance exceeds maximum allowed"}),
     ],
+    ids=[
+        "Test for first delivery range",
+        "Test for 2nd delivery range",
+        "Test for 3rd delivery range",
+        "Test for 4th delivery range",
+        "Test for out of bounds delivery (error expected)",
+    ],
 )
 def test_multiple_distance_ranges(base_price, distance_ranges, distance, expected_fee):  # fmt:skip
     assert get_delivery_fee(base_price, distance, distance_ranges) == expected_fee
