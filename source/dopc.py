@@ -115,7 +115,7 @@ def get_venue_data(venue_slug: str) -> dict:
         dynamic_data = dynamic_response.json()
 
     if errors:
-        raise HTTPException(status_code=500, detail=errors)
+        raise HTTPException(status_code=400, detail=errors)
 
     try:
         venue_coordinates = static_data["venue_raw"]["location"]["coordinates"]  # fmt:skip
@@ -124,7 +124,7 @@ def get_venue_data(venue_slug: str) -> dict:
         base_price_for_delivery = dynamic_data_delivery_specs["delivery_pricing"]["base_price"]  # fmt:skip
         distance_ranges_for_delivery = dynamic_data_delivery_specs["delivery_pricing"]["distance_ranges"]  # fmt:skip
     except KeyError as e:
-        raise HTTPException(status_code=500, detail=f"Missing key in API response {e}")
+        raise HTTPException(status_code=400, detail=f"Missing key in API response {e}")
 
     return {
         "venue_coordinates": venue_coordinates,
@@ -150,7 +150,9 @@ def get_delivery_fee(base_price, distance, distance_ranges):
             venue_b = distance_range["b"]
             break
         elif distance_range["max"] == 0:
-            return {"Error 400": "Distance exceeds maximum allowed"}
+            raise HTTPException(
+                status_code=400, detail="Distance exceeds maximum permissible limit."
+            )
     fee = base_price + venue_a + round(venue_b * distance / 10)
     return fee
 
@@ -166,6 +168,7 @@ def get_total_price(cart_value: int, small_order_surcharge: int, delivery_fee: i
     return cart_value + small_order_surcharge + delivery_fee
 
 
+# TODO change get_delivery_fee tests to accommodate possible error raising
 # TODO make logic functions throw errors if results don't make sense
 # TODO endpoint should return error 400 if something is not possible (is there a technicality here?)
 # TODO before any request check that the response is 200
