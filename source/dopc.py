@@ -1,16 +1,9 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import requests
 import math
 
 app = FastAPI()
-
-orders = {
-    1: {
-        "cart_value": 1200,
-        "coordinates": [18.6454235, 57.2847234],
-    }
-}
 
 venues = [
     "home-assignment-venue-helsinki",
@@ -47,8 +40,10 @@ def delivery_order_price(*, venue_slug: str, cart_value: int, user_lat: float, u
         cart_value,
     )
 
+    total_price = get_total_price(cart_value, delivery_fee, small_order_surcharge)
+
     return {
-        "total_price": (small_order_surcharge + cart_value + delivery_fee),
+        "total_price": total_price,
         "small_order_surcharge": small_order_surcharge,
         "cart_value": cart_value,
         "delivery": {
@@ -62,6 +57,7 @@ def get_distance(user_coordinates: list, venue_coordinates: list):
     """
     The function uses the Haversine formula to calculate the distance between
     two points using their coordinates (latitude and longitude).
+    https://en.wikipedia.org/wiki/Haversine_formula
     Returns:
         float: The distance between the two points in meters.
     """
@@ -84,15 +80,52 @@ def get_distance(user_coordinates: list, venue_coordinates: list):
     return EARTH_RADIUS * 2 * math.asin(math.sqrt(aux))
 
 
-def get_venue_data(venue_slug: str):
-    venue_slug = venue_slug.split("-")[-1]
-    static_url = f"https://consumer-api.development.dev.woltapi.com/home-assignment-api/v1/venues/home-assignment-venue-{venue_slug}/static"
-    dynamic_url = f"https://consumer-api.development.dev.woltapi.com/home-assignment-api/v1/venues/home-assignment-venue-{venue_slug}/dynamic"
+def get_venue_data(venue_slug: str) -> dict:
+    """
+    Fetches and returns venue data from the Wolt API.
+    Args:
+        venue_slug (str): The unique identifier for the venue.
+    Returns:
+        dict: A dictionary containing the venue's coordinates, order minimum
+        to avoid surcharge, base price for delivery, and distance ranges for delivery.
+    Raises:
+        HTTPException: If there is an issue with the HTTP request.
+        KeyError: If the expected keys are not found in the API response.
+    """
+    # TODO make function raise error if response != 200
+    static_url = f"https://consumer-api.development.dev.woltapi.com/home-assignment-api/v1/venues/{venue_slug}/static"
+    dynamic_url = f"https://consumer-api.development.dev.woltapi.com/home-assignment-api/v1/venues/{venue_slug}/dynamic"
 
-    venue_coordinates = requests.get(static_url).json()["venue_raw"]["location"]["coordinates"]  # fmt:skip
-    order_minimum_no_surcharge = requests.get(dynamic_url).json()["venue_raw"]["delivery_specs"]["order_minimum_no_surcharge"]  # fmt:skip
-    base_price_for_delivery = requests.get(dynamic_url).json()["venue_raw"]["delivery_specs"]["delivery_pricing"]["base_price"]  # fmt:skip
-    distance_ranges_for_delivery = requests.get(dynamic_url).json()["venue_raw"]["delivery_specs"]["delivery_pricing"]["distance_ranges"]  # fmt:skip
+    errors = {}
+
+    static_response = requests.get(static_url)
+    dynamic_response = requests.get(dynamic_url)
+
+    if static_response.status_code != 200:
+        errors["static_data_error"] = (
+            f"Static data request failed with status code {static_response.status_code}"
+        )
+    else:
+        static_data = static_response.json()
+
+    if dynamic_response.status_code != 200:
+        errors["dynamic_data_error"] = (
+            f"Dynamic data request failed with status code {dynamic_response.status_code}"
+        )
+    else:
+        dynamic_data = dynamic_response.json()
+
+    if errors:
+        raise HTTPException(status_code=400, detail=errors)
+
+    try:
+        venue_coordinates = static_data["venue_raw"]["location"]["coordinates"]  # fmt:skip
+        dynamic_data_delivery_specs = dynamic_data["venue_raw"]["delivery_specs"]
+        order_minimum_no_surcharge = dynamic_data_delivery_specs["order_minimum_no_surcharge"]  # fmt:skip
+        base_price_for_delivery = dynamic_data_delivery_specs["delivery_pricing"]["base_price"]  # fmt:skip
+        distance_ranges_for_delivery = dynamic_data_delivery_specs["delivery_pricing"]["distance_ranges"]  # fmt:skip
+    except KeyError as e:
+        raise HTTPException(status_code=400, detail=f"Missing key in API response {e}")
 
     return {
         "venue_coordinates": venue_coordinates,
@@ -111,6 +144,8 @@ def get_delivery_fee(base_price, distance, distance_ranges):
     Returns:
         int: The total cost of the delivery in the lowest denomination of
         the local currency.
+    Raises:
+        HTTPException: If the distance exceeds the maximum permissible distance.
     """
     for distance_range in distance_ranges:
         if distance <= distance_range["max"]:
@@ -118,57 +153,36 @@ def get_delivery_fee(base_price, distance, distance_ranges):
             venue_b = distance_range["b"]
             break
         elif distance_range["max"] == 0:
-            return {"Error 400": "Distance exceeds maximum allowed"}
+            raise HTTPException(
+                status_code=400, detail="Distance exceeds maximum permissible limit."
+            )
     fee = base_price + venue_a + round(venue_b * distance / 10)
     return fee
 
 
 def get_small_order_surcharge(order_minimum_no_surcharge: int, cart_value: int):
     small_order_surcharge = order_minimum_no_surcharge - cart_value
-    if small_order_surcharge < 0:
-        return 0
-    return small_order_surcharge
+    return max(small_order_surcharge, 0)
 
 
-# is this supposed to be hardcoded or should it be able to take more endpoints?
-# venue_location = requests.get(
-#     "https://consumer-api.development.dev.woltapi.com/home-assignment-api/v1/venues/home-assignment-venue-berlin/static"
-# )
-# print(venue_location.json()["venue_raw"]["location"]["coordinates"])
+def get_total_price(cart_value: int, small_order_surcharge: int, delivery_fee: int):
+    return cart_value + small_order_surcharge + delivery_fee
 
-# venue_dynamic = requests.get(
-#     "https://consumer-api.development.dev.woltapi.com/home-assignment-api/v1/venues/home-assignment-venue-berlin/dynamic"
-# )
-# delivery_specs = venue_dynamic.json()["venue_raw"]["delivery_specs"]
-# order_minimum_no_surcharge = delivery_specs["order_minimum_no_surcharge"]
-# base_price_for_delivery = delivery_specs["delivery_pricing"]["base_price"]
-# distance_ranges_for_delivery = delivery_specs["delivery_pricing"]["distance_ranges"]
 
-# print(
-#     f"{order_minimum_no_surcharge}\n{base_price_for_delivery}\n{distance_ranges_for_delivery}"
-# )
-
-# print(
-#     get_distance(
-#         user_order1["coordinates"],
-#         venue_location.json()["venue_raw"]["location"]["coordinates"],
-#     )
-# )
-
-# print(get_venue_data("home-assignment-venue-berlin")[1])
-# print(get_delivery_fee(199, 600, 100, 1.555))
-
+# TODO change get_delivery_fee tests to accommodate possible error raising
+# TODO make logic functions throw errors if results don't make sense
 # TODO endpoint should return error 400 if something is not possible (is there a technicality here?)
-# DONE enable Github for version control (not public)
 # TODO before any request check that the response is 200
 # TODO get Fonseca to proof check my math
-# DONE one of the coordinates isn't supposed to be processed as a list (in endpoint)
 # TODO correct Haversine
-# DONE correct endpoint Path
 # TODO document get_venue_data
+# TODO test get_venue_data (with mocking)
 # TODO test endpoint
-# TODO get_fee should take ranges into consideration
-# TODO remember small order surcharge can never be negative
 # TODO instructions on how to install and run
-# TODO document tests (explain what each test is testing like for which range)
 # TODO complete functions with expected output and type hints
+# DONE get_fee should take ranges into consideration
+# DONE remember small order surcharge can never be negative
+# DONE enable Github for version control (not public)
+# DONE one of the coordinates isn't supposed to be processed as a list (in endpoint)
+# DONE correct endpoint Path
+# DONE document tests (explain what each test is testing like for which range)
