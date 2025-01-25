@@ -57,6 +57,7 @@ def get_distance(user_coordinates: list, venue_coordinates: list):
     """
     The function uses the Haversine formula to calculate the distance between
     two points using their coordinates (latitude and longitude).
+    https://en.wikipedia.org/wiki/Haversine_formula
     Returns:
         float: The distance between the two points in meters.
     """
