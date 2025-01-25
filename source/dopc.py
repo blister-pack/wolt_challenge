@@ -5,13 +5,6 @@ import math
 
 app = FastAPI()
 
-orders = {
-    1: {
-        "cart_value": 1200,
-        "coordinates": [18.6454235, 57.2847234],
-    }
-}
-
 venues = [
     "home-assignment-venue-helsinki",
     "home-assignment-venue-stockholm",
