@@ -159,9 +159,7 @@ def get_delivery_fee(base_price, distance, distance_ranges):
 
 def get_small_order_surcharge(order_minimum_no_surcharge: int, cart_value: int):
     small_order_surcharge = order_minimum_no_surcharge - cart_value
-    if small_order_surcharge < 0:
-        return 0
-    return small_order_surcharge
+    return max(small_order_surcharge, 0)
 
 
 def get_total_price(cart_value: int, small_order_surcharge: int, delivery_fee: int):
