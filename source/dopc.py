@@ -5,13 +5,6 @@ import math
 
 app = FastAPI()
 
-venues = [
-    "home-assignment-venue-helsinki",
-    "home-assignment-venue-stockholm",
-    "home-assignment-venue-berlin",
-    "home-assignment-venue-tokyo",
-]
-
 
 @app.get("/api/v1/delivery-order-price")
 def delivery_order_price(*, venue_slug: str, cart_value: int, user_lat: float, user_lon: float):  # fmt:skip
