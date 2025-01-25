@@ -88,7 +88,7 @@ def get_venue_data(venue_slug: str) -> dict:
         dict: A dictionary containing the venue's coordinates, order minimum
         to avoid surcharge, base price for delivery, and distance ranges for delivery.
     Raises:
-        requests.exceptions.RequestException: If there is an issue with the HTTP request.
+        HTTPException: If there is an issue with the HTTP request.
         KeyError: If the expected keys are not found in the API response.
     """
     # TODO make function raise error if response != 200
@@ -143,6 +143,8 @@ def get_delivery_fee(base_price, distance, distance_ranges):
     Returns:
         int: The total cost of the delivery in the lowest denomination of
         the local currency.
+    Raises:
+        HTTPException: If the distance exceeds the maximum permissible distance.
     """
     for distance_range in distance_ranges:
         if distance <= distance_range["max"]:
