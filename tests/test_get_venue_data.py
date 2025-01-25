@@ -1,3 +1,4 @@
+
 venues = [
     "home-assignment-venue-helsinki",
     "home-assignment-venue-stockholm",

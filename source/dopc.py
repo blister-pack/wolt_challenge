@@ -153,6 +153,22 @@ def get_small_order_surcharge(order_minimum_no_surcharge: int, cart_value: int):
 
 
 def get_total_price(cart_value: int, small_order_surcharge: int, delivery_fee: int):
+    errors = {}
+
+    if cart_value < 0:
+        errors["cart_value_error"] = "cart value can't be negative"
+
+    if small_order_surcharge < 0:
+        errors["small_order_surcharge_error"] = (
+            "small order surcharge can't be negative"
+        )
+
+    if delivery_fee < 0:
+        errors["delivery_fee"] = "delivery fee can't be negative"
+
+    if errors:
+        raise HTTPException(status_code=400, detail=errors)
+
     return cart_value + small_order_surcharge + delivery_fee
 
 
