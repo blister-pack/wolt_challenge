@@ -52,12 +52,12 @@ def get_distance(user_coordinates: list, venue_coordinates: list):
     user_lat, user_lon = user_coordinates
     venue_lat, venue_lon = venue_coordinates
 
-    EARTH_RADIUS = 6371 * (10**3)  # earth radius in meters
+    EARTH_RADIUS = 6372.8 * (10**3)  # earth radius in meters
 
-    user_lat_radians = math.radians(user_lat)
-    venue_lat_radians = math.radians(venue_lat)
-    delta_lat = venue_lat_radians - user_lat_radians
+    delta_lat = math.radians(venue_lat - user_lat)
     delta_lon = math.radians(venue_lon - user_lon)
+    user_lat = math.radians(user_lat)
+    venue_lat = math.radians(venue_lat)
 
     aux = (
         math.sin(delta_lat / 2) ** 2
