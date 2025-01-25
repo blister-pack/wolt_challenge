@@ -79,7 +79,7 @@ def get_distance(user_coordinates: list, venue_coordinates: list):
     return EARTH_RADIUS * 2 * math.asin(math.sqrt(aux))
 
 
-def get_venue_data(venue_slug: str):
+def get_venue_data(venue_slug: str) -> dict:
     static_url = f"https://consumer-api.development.dev.woltapi.com/home-assignment-api/v1/venues/{venue_slug}/static"
     dynamic_url = f"https://consumer-api.development.dev.woltapi.com/home-assignment-api/v1/venues/{venue_slug}/dynamic"
 
