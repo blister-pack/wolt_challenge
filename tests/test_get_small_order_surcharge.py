@@ -16,6 +16,13 @@ def minimum_order_no_surcharge_value():
         (1000, 0),
         (1200, 0),
     ],
+    ids=[
+        "Test with surcharge 1",
+        "Test with surcharge 2",
+        "Test with surcharge 3",
+        "Test that should equal 0",
+        "Test that checks if 0 is returned instead of negative number",
+    ],
 )
 def test_multiple_surcharge_values(minimum_order_no_surcharge_value, cart_value, expected_surcharge):  # fmt:skip
     assert (
