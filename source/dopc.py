@@ -40,7 +40,7 @@ def delivery_order_price(*, venue_slug: str, cart_value: int, user_lat: float, u
     }
 
 
-def get_distance(user_coordinates: list, venue_coordinates: list) -> int:
+def get_distance(venue_coordinates: list, user_coordinates: list) -> int:
     """
     The function uses the Haversine formula to calculate the distance between
     two points using their coordinates (latitude and longitude).
@@ -48,6 +48,9 @@ def get_distance(user_coordinates: list, venue_coordinates: list) -> int:
     Returns:
         int: The distance between the two points in meters.
     """
+
+    if len(venue_coordinates) != 2:
+        raise HTTPException(status_code=400, detail="Venue must have only 2 coordinates")
 
     user_lat, user_lon = user_coordinates
     venue_lat, venue_lon = venue_coordinates
