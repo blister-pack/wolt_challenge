@@ -129,6 +129,7 @@ def get_small_order_surcharge(order_minimum_no_surcharge: int, cart_value: int):
         return 0
     return small_order_surcharge
 
+# small code change
 
 # is this supposed to be hardcoded or should it be able to take more endpoints?
 # venue_location = requests.get(
