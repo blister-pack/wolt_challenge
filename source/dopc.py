@@ -43,7 +43,7 @@ def delivery_order_price(*, venue_slug: str, cart_value: int, user_lat: float, u
     total_price = get_total_price(cart_value, delivery_fee, small_order_surcharge)
 
     return {
-        "total_price": (small_order_surcharge + cart_value + delivery_fee),
+        "total_price": total_price,
         "small_order_surcharge": small_order_surcharge,
         "cart_value": cart_value,
         "delivery": {
@@ -124,21 +124,22 @@ def get_small_order_surcharge(order_minimum_no_surcharge: int, cart_value: int):
         return 0
     return small_order_surcharge
 
-def get_total_price():
-    pass
+
+def get_total_price(cart_value: int, small_order_surcharge: int, delivery_fee: int):
+    return cart_value + small_order_surcharge + delivery_fee
 
 
 # TODO endpoint should return error 400 if something is not possible (is there a technicality here?)
-# DONE enable Github for version control (not public)
 # TODO before any request check that the response is 200
 # TODO get Fonseca to proof check my math
-# DONE one of the coordinates isn't supposed to be processed as a list (in endpoint)
 # TODO correct Haversine
-# DONE correct endpoint Path
 # TODO document get_venue_data
 # TODO test endpoint
 # TODO get_fee should take ranges into consideration
 # TODO remember small order surcharge can never be negative
 # TODO instructions on how to install and run
-# TODO document tests (explain what each test is testing like for which range)
 # TODO complete functions with expected output and type hints
+# DONE enable Github for version control (not public)
+# DONE one of the coordinates isn't supposed to be processed as a list (in endpoint)
+# DONE correct endpoint Path
+# DONE document tests (explain what each test is testing like for which range)
