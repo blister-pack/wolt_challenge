@@ -85,9 +85,10 @@ def get_venue_data(venue_slug: str):
     dynamic_url = f"https://consumer-api.development.dev.woltapi.com/home-assignment-api/v1/venues/home-assignment-venue-{venue_slug}/dynamic"
 
     venue_coordinates = requests.get(static_url).json()["venue_raw"]["location"]["coordinates"]  # fmt:skip
-    order_minimum_no_surcharge = requests.get(dynamic_url).json()["venue_raw"]["delivery_specs"]["order_minimum_no_surcharge"]  # fmt:skip
-    base_price_for_delivery = requests.get(dynamic_url).json()["venue_raw"]["delivery_specs"]["delivery_pricing"]["base_price"]  # fmt:skip
-    distance_ranges_for_delivery = requests.get(dynamic_url).json()["venue_raw"]["delivery_specs"]["delivery_pricing"]["distance_ranges"]  # fmt:skip
+    dynamic_data = requests.get(dynamic_url).json()["venue_raw"]["delivery_specs"]
+    order_minimum_no_surcharge = dynamic_data["order_minimum_no_surcharge"]  # fmt:skip
+    base_price_for_delivery = dynamic_data["delivery_pricing"]["base_price"]  # fmt:skip
+    distance_ranges_for_delivery = dynamic_data["delivery_pricing"]["distance_ranges"]  # fmt:skip
 
     return {
         "venue_coordinates": venue_coordinates,
