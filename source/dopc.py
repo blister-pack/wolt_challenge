@@ -40,6 +40,8 @@ def delivery_order_price(*, venue_slug: str, cart_value: int, user_lat: float, u
         cart_value,
     )
 
+    total_price = get_total_price(cart_value, delivery_fee, small_order_surcharge)
+
     return {
         "total_price": (small_order_surcharge + cart_value + delivery_fee),
         "small_order_surcharge": small_order_surcharge,
@@ -122,34 +124,9 @@ def get_small_order_surcharge(order_minimum_no_surcharge: int, cart_value: int):
         return 0
     return small_order_surcharge
 
+def get_total_price():
+    pass
 
-# is this supposed to be hardcoded or should it be able to take more endpoints?
-# venue_location = requests.get(
-#     "https://consumer-api.development.dev.woltapi.com/home-assignment-api/v1/venues/home-assignment-venue-berlin/static"
-# )
-# print(venue_location.json()["venue_raw"]["location"]["coordinates"])
-
-# venue_dynamic = requests.get(
-#     "https://consumer-api.development.dev.woltapi.com/home-assignment-api/v1/venues/home-assignment-venue-berlin/dynamic"
-# )
-# delivery_specs = venue_dynamic.json()["venue_raw"]["delivery_specs"]
-# order_minimum_no_surcharge = delivery_specs["order_minimum_no_surcharge"]
-# base_price_for_delivery = delivery_specs["delivery_pricing"]["base_price"]
-# distance_ranges_for_delivery = delivery_specs["delivery_pricing"]["distance_ranges"]
-
-# print(
-#     f"{order_minimum_no_surcharge}\n{base_price_for_delivery}\n{distance_ranges_for_delivery}"
-# )
-
-# print(
-#     get_distance(
-#         user_order1["coordinates"],
-#         venue_location.json()["venue_raw"]["location"]["coordinates"],
-#     )
-# )
-
-# print(get_venue_data("home-assignment-venue-berlin")[1])
-# print(get_delivery_fee(199, 600, 100, 1.555))
 
 # TODO endpoint should return error 400 if something is not possible (is there a technicality here?)
 # DONE enable Github for version control (not public)
