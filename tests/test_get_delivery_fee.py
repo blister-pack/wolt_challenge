@@ -37,7 +37,3 @@ def distance_ranges():
 )
 def test_multiple_distance_ranges(base_price, distance_ranges, distance, expected_fee):  # fmt:skip
     assert get_delivery_fee(base_price, distance, distance_ranges) == expected_fee
-
-
-# TODO put and test all venue data here
-# TODO create three tests - one for each delivery range
