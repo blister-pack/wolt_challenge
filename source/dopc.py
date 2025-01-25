@@ -80,9 +80,8 @@ def get_distance(user_coordinates: list, venue_coordinates: list):
 
 
 def get_venue_data(venue_slug: str):
-    venue_slug = venue_slug.split("-")[-1]
-    static_url = f"https://consumer-api.development.dev.woltapi.com/home-assignment-api/v1/venues/home-assignment-venue-{venue_slug}/static"
-    dynamic_url = f"https://consumer-api.development.dev.woltapi.com/home-assignment-api/v1/venues/home-assignment-venue-{venue_slug}/dynamic"
+    static_url = f"https://consumer-api.development.dev.woltapi.com/home-assignment-api/v1/venues/{venue_slug}/static"
+    dynamic_url = f"https://consumer-api.development.dev.woltapi.com/home-assignment-api/v1/venues/{venue_slug}/dynamic"
 
     venue_coordinates = requests.get(static_url).json()["venue_raw"]["location"]["coordinates"]  # fmt:skip
     dynamic_data = requests.get(dynamic_url).json()["venue_raw"]["delivery_specs"]
@@ -136,6 +135,7 @@ def get_total_price(cart_value: int, small_order_surcharge: int, delivery_fee: i
 # TODO get Fonseca to proof check my math
 # TODO correct Haversine
 # TODO document get_venue_data
+# TODO test get_venue_data
 # TODO test endpoint
 # TODO instructions on how to install and run
 # TODO complete functions with expected output and type hints
