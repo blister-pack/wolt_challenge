@@ -129,16 +129,17 @@ def get_total_price(cart_value: int, small_order_surcharge: int, delivery_fee: i
     return cart_value + small_order_surcharge + delivery_fee
 
 
+# TODO make logic functions throw errors if results don't make sense
 # TODO endpoint should return error 400 if something is not possible (is there a technicality here?)
 # TODO before any request check that the response is 200
 # TODO get Fonseca to proof check my math
 # TODO correct Haversine
 # TODO document get_venue_data
 # TODO test endpoint
-# TODO get_fee should take ranges into consideration
-# TODO remember small order surcharge can never be negative
 # TODO instructions on how to install and run
 # TODO complete functions with expected output and type hints
+# DONE get_fee should take ranges into consideration
+# DONE remember small order surcharge can never be negative
 # DONE enable Github for version control (not public)
 # DONE one of the coordinates isn't supposed to be processed as a list (in endpoint)
 # DONE correct endpoint Path
