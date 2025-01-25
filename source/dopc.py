@@ -50,7 +50,9 @@ def get_distance(venue_coordinates: list, user_coordinates: list) -> int:
     """
 
     if len(venue_coordinates) != 2:
-        raise HTTPException(status_code=400, detail="Venue must have only 2 coordinates")
+        raise HTTPException(
+            status_code=400, detail="Venue must have only 2 coordinates"
+        )
 
     user_lat, user_lon = user_coordinates
     venue_lat, venue_lon = venue_coordinates
@@ -176,15 +178,15 @@ def get_total_price(cart_value: int, small_order_surcharge: int, delivery_fee: i
 
 
 # TODO change get_delivery_fee tests to accommodate possible error raising
-# TODO make logic functions throw errors if results don't make sense
-# TODO before any request check that the response is 200
-# TODO get Fonseca to proof check my math
-# TODO correct Haversine
 # TODO test get_venue_data (with mocking)
 # TODO test endpoint
 # TODO instructions on how to install and run
 # TODO complete functions with expected output and type hints
 # TODO implement clean architecture design
+# DONE before any request check that the response is 200
+# DONE get Fonseca to proof check my math
+# DONE correct Haversine
+# DONE make logic functions throw errors if results don't make sense
 # DONE endpoint should return error 400 if something is not possible (is there a technicality here?)
 # DONE document get_venue_data
 # DONE get_fee should take ranges into consideration
