@@ -1,5 +1,5 @@
 import pytest
-from source.dopc import get_small_order_surcharge
+from source.delivery_price_logic import get_small_order_surcharge
 
 
 @pytest.fixture

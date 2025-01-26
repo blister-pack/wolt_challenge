@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from source.dopc import extract_venue_coordinates
+from source.delivery_price_logic import extract_venue_coordinates
 import pytest
 
 

@@ -1,5 +1,5 @@
 import pytest
-from source.dopc import get_delivery_fee
+from source.delivery_price_logic import get_delivery_fee
 from fastapi import HTTPException
 
 

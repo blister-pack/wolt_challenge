@@ -1,6 +1,6 @@
 from fastapi import HTTPException
 import pytest
-from source.dopc import get_total_price
+from source.delivery_price_logic import get_total_price
 
 
 def generate_error_dict(*error_keys):

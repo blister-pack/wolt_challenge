@@ -1,5 +1,5 @@
 import pytest
-from source.dopc import get_venue_data
+from source.venue_client import get_venue_data
 from fastapi import HTTPException
 
 
