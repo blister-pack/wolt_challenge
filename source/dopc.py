@@ -181,6 +181,15 @@ def get_total_price(cart_value: int, small_order_surcharge: int, delivery_fee: i
 
 
 def extract_venue_coordinates(venue_coordinates_list: list) -> tuple:
+    """
+    Extracts and returns the latitude and longitude from a list of venue coordinates.
+    Args:
+        venue_coordinates_list (list): A list containing exactly two elements - latitude and longitude.
+    Returns:
+        tuple: A tuple containing the latitude and longitude.
+    Raises:
+        HTTPException: If the input list does not contain exactly two elements.
+    """
     if len(venue_coordinates_list) != 2:
         raise HTTPException(
             status_code=400,
