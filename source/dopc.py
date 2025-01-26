@@ -161,6 +161,21 @@ def get_small_order_surcharge(order_minimum_no_surcharge: int, cart_value: int):
 
 
 def get_total_price(cart_value: int, small_order_surcharge: int, delivery_fee: int):
+    """
+    Calculate the total price of an order including cart value, small order surcharge,
+    and delivery fee.
+    Args:
+        cart_value (int): The value of the items in the cart. Must be non-negative.
+        small_order_surcharge (int): The surcharge applied to small orders. Must be
+        non-negative.
+        delivery_fee (int): The fee for delivering the order. Must be non-negative.
+    Returns:
+        int: The total price of the order.
+    Raises:
+        HTTPException: If any of the input values are negative, an HTTPException
+        is raised with a status code of 400 and details of the errors.
+    """
+
     errors = {}
 
     if cart_value < 0:
