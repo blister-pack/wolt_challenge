@@ -53,8 +53,8 @@ def delivery_order_price(*, venue_slug: str, cart_value: int, user_lat: float, u
 # TODO change get_delivery_fee tests to accommodate possible error raising
 # TODO test get_venue_data (with mocking)
 # TODO test endpoint
-# TODO instructions on how to install and run
 # TODO complete functions with expected output and type hints
+# DONE instructions on how to install and run
 # DONE implement clean architecture design
 # DONE before any request check that the response is 200
 # DONE get Fonseca to proof check my math
