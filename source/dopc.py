@@ -47,4 +47,3 @@ def delivery_order_price(*, venue_slug: str, cart_value: int, user_lat: float, u
             "distance": distance,
         },
     }
-
