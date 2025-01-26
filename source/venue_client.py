@@ -14,7 +14,6 @@ def get_venue_data(venue_slug: str) -> dict:
         HTTPException: If there is an issue with the HTTP request.
         KeyError: If the expected keys are not found in the API response.
     """
-    # TODO make function raise error if response != 200
     static_url = f"https://consumer-api.development.dev.woltapi.com/home-assignment-api/v1/venues/{venue_slug}/static"
     dynamic_url = f"https://consumer-api.development.dev.woltapi.com/home-assignment-api/v1/venues/{venue_slug}/dynamic"
 
@@ -41,11 +40,17 @@ def get_venue_data(venue_slug: str) -> dict:
         raise HTTPException(status_code=400, detail=errors)
 
     try:
-        venue_coordinates = static_data["venue_raw"]["location"]["coordinates"]  # fmt:skip
+        venue_coordinates = static_data["venue_raw"]["location"]["coordinates"]
         dynamic_data_delivery_specs = dynamic_data["venue_raw"]["delivery_specs"]
-        order_minimum_no_surcharge = dynamic_data_delivery_specs["order_minimum_no_surcharge"]  # fmt:skip
-        base_price_for_delivery = dynamic_data_delivery_specs["delivery_pricing"]["base_price"]  # fmt:skip
-        distance_ranges_for_delivery = dynamic_data_delivery_specs["delivery_pricing"]["distance_ranges"]  # fmt:skip
+        order_minimum_no_surcharge = dynamic_data_delivery_specs[
+            "order_minimum_no_surcharge"
+        ]
+        base_price_for_delivery = dynamic_data_delivery_specs["delivery_pricing"][
+            "base_price"
+        ]
+        distance_ranges_for_delivery = dynamic_data_delivery_specs["delivery_pricing"][
+            "distance_ranges"
+        ]
     except KeyError as e:
         raise HTTPException(status_code=400, detail=f"Missing key in API response {e}")
 
