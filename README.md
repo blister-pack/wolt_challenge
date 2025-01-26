@@ -41,6 +41,14 @@ The instructions for the installation of and running of the program are as follo
 used coordinates for testing:
 
 lat: 24.93913512 lon: 60.18112143 venue: home-assignment-venue-helsinki
-lat: … lon: … venue: home-assignment-venue-stockholm
-lat: … lon: … venue: home-assignment-venue-berlin
-lat: … lon: … venue: home-assignment-venue-tokyo
+
+Note on Endpoint Testing
+Due to time constraints, I was unable to develop dedicated tests for the endpoint. However, here's what I would have implemented:
+
+Test Framework: Use pytest along with httpx for FastAPI's TestClient.
+Mocking Dependencies: Use Python's unittest.mock to mock functions like get_venue_data, get_distance, and get_delivery_fee to isolate the endpoint logic from external dependencies.
+Simulated Scenarios:
+Valid inputs returning expected results.
+Edge cases such as missing or invalid parameters.
+Dependency failures, raising appropriate exceptions.
+This testing strategy would ensure the endpoint behaves as expected under different conditions.
