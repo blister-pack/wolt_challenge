@@ -48,23 +48,3 @@ def delivery_order_price(*, venue_slug: str, cart_value: int, user_lat: float, u
         },
     }
 
-
-# TODO make dopc.py work by just running it - if __name__ == __main__
-# TODO change get_delivery_fee tests to accommodate possible error raising
-# TODO test get_venue_data (with mocking)
-# TODO test endpoint
-# TODO complete functions with expected output and type hints
-# DONE instructions on how to install and run
-# DONE implement clean architecture design
-# DONE before any request check that the response is 200
-# DONE get Fonseca to proof check my math
-# DONE correct Haversine
-# DONE make logic functions throw errors if results don't make sense
-# DONE endpoint should return error 400 if something is not possible (is there a technicality here?)
-# DONE document get_venue_data
-# DONE get_fee should take ranges into consideration
-# DONE remember small order surcharge can never be negative
-# DONE enable Github for version control (not public)
-# DONE one of the coordinates isn't supposed to be processed as a list (in endpoint)
-# DONE correct endpoint Path
-# DONE document tests (explain what each test is testing like for which range)

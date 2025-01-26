@@ -3,6 +3,12 @@ from source.venue_client import get_venue_data
 from fastapi import HTTPException
 
 
+def test_bad_slug(bad_slug="bad_slug"):
+    with pytest.raises(HTTPException) as exception_info:
+        get_venue_data(bad_slug)
+        assert exception_info.value.status_code == 400
+
+
 @pytest.mark.parametrize(
     "venue_slug, expected_data_dict",
     [

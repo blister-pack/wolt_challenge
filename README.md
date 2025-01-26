@@ -9,7 +9,9 @@ The instructions for the installation of and running of the program are as follo
     `cd <project_directory>`
 
 2. Create a Virtual Environment:
-    `python -m venv .venv`
+    `python -m venv .venv` 
+    if it doesn't work:
+    `python3 -m venv .venv` 
 
 3. Activate Virtual Environment:
     `source .venv/bin/activate`
@@ -35,3 +37,10 @@ The instructions for the installation of and running of the program are as follo
 
 1. Run tests:
     `pytest tests/`
+
+used coordinates for testing:
+
+lat: 24.93913512 lon: 60.18112143 venue: home-assignment-venue-helsinki
+lat: … lon: … venue: home-assignment-venue-stockholm
+lat: … lon: … venue: home-assignment-venue-berlin
+lat: … lon: … venue: home-assignment-venue-tokyo
