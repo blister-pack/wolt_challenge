@@ -11,7 +11,10 @@ The instructions for the installation of and running of the program are as follo
 2. Create a Virtual Environment:
     `python -m venv .venv`
 
-3. Install required dependencies:
+3. Activate Virtual Environment:
+    `source .venv/bin/activate`
+
+4. Install required dependencies:
     `pip install -r requirements.txt`
 
 
