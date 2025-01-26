@@ -39,20 +39,16 @@ def get_venue_data(venue_slug: str) -> dict:
     if errors:
         raise HTTPException(status_code=400, detail=errors)
 
+    # fmt:off
     try:
         venue_coordinates = static_data["venue_raw"]["location"]["coordinates"]
         dynamic_data_delivery_specs = dynamic_data["venue_raw"]["delivery_specs"]
-        order_minimum_no_surcharge = dynamic_data_delivery_specs[
-            "order_minimum_no_surcharge"
-        ]
-        base_price_for_delivery = dynamic_data_delivery_specs["delivery_pricing"][
-            "base_price"
-        ]
-        distance_ranges_for_delivery = dynamic_data_delivery_specs["delivery_pricing"][
-            "distance_ranges"
-        ]
+        order_minimum_no_surcharge = dynamic_data_delivery_specs["order_minimum_no_surcharge"]
+        base_price_for_delivery = dynamic_data_delivery_specs["delivery_pricing"]["base_price"]
+        distance_ranges_for_delivery = dynamic_data_delivery_specs["delivery_pricing"]["distance_ranges"]
     except KeyError as e:
         raise HTTPException(status_code=400, detail=f"Missing key in API response {e}")
+    # fmt:on
 
     return {
         "venue_coordinates": venue_coordinates,
