@@ -8,7 +8,6 @@ from delivery_price_logic import (
     get_small_order_surcharge,
     get_total_price,
 )
-
 from venue_client import get_venue_data
 
 app = FastAPI()
