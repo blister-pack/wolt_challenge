@@ -160,7 +160,7 @@ def get_small_order_surcharge(order_minimum_no_surcharge: int, cart_value: int):
     return max(small_order_surcharge, 0)
 
 
-def get_total_price(cart_value: int, small_order_surcharge: int, delivery_fee: int):
+def get_total_price(cart_value: int, small_order_surcharge: int, delivery_fee: int) ->int:  # fmt:skip
     """
     Calculate the total price of an order including cart value, small order surcharge,
     and delivery fee.
