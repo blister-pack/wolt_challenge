@@ -1,3 +1,4 @@
+from ast import Tuple
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import requests
@@ -11,9 +12,11 @@ def delivery_order_price(*, venue_slug: str, cart_value: int, user_lat: float, u
 
     venue_data = get_venue_data(venue_slug)
 
+    venue_coordinates = extract_venue_coordinates(venue_data["venue_coordinates"])
+
     distance = get_distance(
-        venue_data["venue_coordinates"],
-        [user_lat, user_lon],
+        venue_coordinates,
+        (user_lat, user_lon),
     )
 
     delivery_fee = get_delivery_fee(
@@ -177,6 +180,18 @@ def get_total_price(cart_value: int, small_order_surcharge: int, delivery_fee: i
     return cart_value + small_order_surcharge + delivery_fee
 
 
+def extract_venue_coordinates(venue_coordinates_list: list) -> tuple:
+    if len(venue_coordinates_list) != 2:
+        raise HTTPException(
+            status_code=400,
+            detail="Can only take in 2 arguments for coordinates -> [latitude, longitude]",
+        )
+
+    venue_lat, venue_lon = venue_coordinates_list
+    return (venue_lat, venue_lon)
+
+
+# TODO make dopc.py work by just running it - if __name__ == __main__
 # TODO change get_delivery_fee tests to accommodate possible error raising
 # TODO test get_venue_data (with mocking)
 # TODO test endpoint
