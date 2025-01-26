@@ -1,8 +1,15 @@
-from ast import Tuple
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
 import requests
 import math
+from delivery_price_logic import (
+    get_delivery_fee,
+    extract_venue_coordinates,
+    get_distance,
+    get_small_order_surcharge,
+    get_total_price,
+)
+
+from venue_client import get_venue_data
 
 app = FastAPI()
 
@@ -43,185 +50,13 @@ def delivery_order_price(*, venue_slug: str, cart_value: int, user_lat: float, u
     }
 
 
-def get_distance(venue_coordinates: tuple, user_coordinates: tuple) -> int:
-    """
-    The function uses the Haversine formula to calculate the distance between
-    two points using their coordinates (latitude and longitude).
-    https://en.wikipedia.org/wiki/Haversine_formula
-    Returns:
-        int: The distance between the two points in meters.
-    """
-
-    if len(venue_coordinates) != 2:
-        raise HTTPException(
-            status_code=400, detail="Venue must have only 2 coordinates"
-        )
-
-    user_lat, user_lon = user_coordinates
-    venue_lat, venue_lon = venue_coordinates
-
-    EARTH_RADIUS = 6372.8 * (10**3)  # earth radius in meters
-
-    delta_lat = math.radians(venue_lat - user_lat)
-    delta_lon = math.radians(venue_lon - user_lon)
-    user_lat = math.radians(user_lat)
-    venue_lat = math.radians(venue_lat)
-
-    aux = (
-        math.sin(delta_lat / 2) ** 2
-        + math.cos(user_lat) * math.cos(venue_lat) * math.sin(delta_lon / 2) ** 2
-    )
-
-    return round(EARTH_RADIUS * 2 * math.asin(math.sqrt(aux)))
-
-
-def get_venue_data(venue_slug: str) -> dict:
-    """
-    Fetches and returns venue data from the Wolt API.
-    Args:
-        venue_slug (str): The unique identifier for the venue.
-    Returns:
-        dict: A dictionary containing the venue's coordinates, order minimum
-        to avoid surcharge, base price for delivery, and distance ranges for delivery.
-    Raises:
-        HTTPException: If there is an issue with the HTTP request.
-        KeyError: If the expected keys are not found in the API response.
-    """
-    # TODO make function raise error if response != 200
-    static_url = f"https://consumer-api.development.dev.woltapi.com/home-assignment-api/v1/venues/{venue_slug}/static"
-    dynamic_url = f"https://consumer-api.development.dev.woltapi.com/home-assignment-api/v1/venues/{venue_slug}/dynamic"
-
-    errors = {}
-
-    static_response = requests.get(static_url)
-    dynamic_response = requests.get(dynamic_url)
-
-    if static_response.status_code != 200:
-        errors["static_data_error"] = (
-            f"Static data request failed with status code {static_response.status_code}"
-        )
-    else:
-        static_data = static_response.json()
-
-    if dynamic_response.status_code != 200:
-        errors["dynamic_data_error"] = (
-            f"Dynamic data request failed with status code {dynamic_response.status_code}"
-        )
-    else:
-        dynamic_data = dynamic_response.json()
-
-    if errors:
-        raise HTTPException(status_code=400, detail=errors)
-
-    try:
-        venue_coordinates = static_data["venue_raw"]["location"]["coordinates"]  # fmt:skip
-        dynamic_data_delivery_specs = dynamic_data["venue_raw"]["delivery_specs"]
-        order_minimum_no_surcharge = dynamic_data_delivery_specs["order_minimum_no_surcharge"]  # fmt:skip
-        base_price_for_delivery = dynamic_data_delivery_specs["delivery_pricing"]["base_price"]  # fmt:skip
-        distance_ranges_for_delivery = dynamic_data_delivery_specs["delivery_pricing"]["distance_ranges"]  # fmt:skip
-    except KeyError as e:
-        raise HTTPException(status_code=400, detail=f"Missing key in API response {e}")
-
-    return {
-        "venue_coordinates": venue_coordinates,
-        "order_minimum_no_surcharge": order_minimum_no_surcharge,
-        "base_price_for_delivery": base_price_for_delivery,
-        "distance_ranges_for_delivery": distance_ranges_for_delivery,
-    }
-
-
-def get_delivery_fee(base_price, distance, distance_ranges):
-    """
-    The function calculates the total fee for a delivery. It takes into
-    consideration the different delivery ranges, which modify the calculation.
-    Using the passed in distance, it determines which distance range should be
-    used and extracts a and b variables.
-    Returns:
-        int: The total cost of the delivery in the lowest denomination of
-        the local currency.
-    Raises:
-        HTTPException: If the distance exceeds the maximum permissible distance.
-    """
-    for distance_range in distance_ranges:
-        if distance <= distance_range["max"]:
-            venue_a = distance_range["a"]
-            venue_b = distance_range["b"]
-            break
-        elif distance_range["max"] == 0:
-            raise HTTPException(
-                status_code=400, detail="Distance exceeds maximum permissible limit."
-            )
-    fee = base_price + venue_a + round(venue_b * distance / 10)
-    return fee
-
-
-def get_small_order_surcharge(order_minimum_no_surcharge: int, cart_value: int):
-    small_order_surcharge = order_minimum_no_surcharge - cart_value
-    return max(small_order_surcharge, 0)
-
-
-def get_total_price(cart_value: int, small_order_surcharge: int, delivery_fee: int) ->int:  # fmt:skip
-    """
-    Calculate the total price of an order including cart value, small order surcharge,
-    and delivery fee.
-    Args:
-        cart_value (int): The value of the items in the cart. Must be non-negative.
-        small_order_surcharge (int): The surcharge applied to small orders. Must be
-        non-negative.
-        delivery_fee (int): The fee for delivering the order. Must be non-negative.
-    Returns:
-        int: The total price of the order.
-    Raises:
-        HTTPException: If any of the input values are negative, an HTTPException
-        is raised with a status code of 400 and details of the errors.
-    """
-
-    errors = {}
-
-    if cart_value < 0:
-        errors["cart_value_error"] = "cart value can't be negative"
-
-    if small_order_surcharge < 0:
-        errors["small_order_surcharge_error"] = (
-            "small order surcharge can't be negative"
-        )
-
-    if delivery_fee < 0:
-        errors["delivery_fee_error"] = "delivery fee can't be negative"
-
-    if errors:
-        raise HTTPException(status_code=400, detail=errors)
-
-    return cart_value + small_order_surcharge + delivery_fee
-
-
-def extract_venue_coordinates(venue_coordinates_list: list) -> tuple:
-    """
-    Extracts and returns the latitude and longitude from a list of venue coordinates.
-    Args:
-        venue_coordinates_list (list): A list containing exactly two elements - latitude and longitude.
-    Returns:
-        tuple: A tuple containing the latitude and longitude.
-    Raises:
-        HTTPException: If the input list does not contain exactly two elements.
-    """
-    if len(venue_coordinates_list) != 2:
-        raise HTTPException(
-            status_code=400,
-            detail="Can only take in 2 arguments for coordinates -> [latitude, longitude]",
-        )
-
-    venue_lat, venue_lon = venue_coordinates_list
-    return (venue_lat, venue_lon)
-
-
 # TODO make dopc.py work by just running it - if __name__ == __main__
 # TODO change get_delivery_fee tests to accommodate possible error raising
 # TODO test get_venue_data (with mocking)
 # TODO test endpoint
 # TODO instructions on how to install and run
 # TODO complete functions with expected output and type hints
-# TODO implement clean architecture design
+# DONE implement clean architecture design
 # DONE before any request check that the response is 200
 # DONE get Fonseca to proof check my math
 # DONE correct Haversine
