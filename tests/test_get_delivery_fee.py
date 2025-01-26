@@ -1,5 +1,6 @@
 import pytest
 from source.dopc import get_delivery_fee
+from fastapi import HTTPException
 
 
 @pytest.fixture
@@ -25,15 +26,25 @@ def distance_ranges():
         (700, 290),
         (1200, 390),
         (1700, 560),
-        (2200, {"Error 400": "Distance exceeds maximum allowed"}),
     ],
     ids=[
         "Test for first delivery range",
         "Test for 2nd delivery range",
         "Test for 3rd delivery range",
         "Test for 4th delivery range",
-        "Test for out of bounds delivery (error expected)",
     ],
 )
 def test_multiple_distance_ranges(base_price, distance_ranges, distance, expected_fee):  # fmt:skip
     assert get_delivery_fee(base_price, distance, distance_ranges) == expected_fee
+
+
+@pytest.fixture
+def out_of_bounds_distance():
+    return 2200
+
+
+def test_raises_exception(out_of_bounds_distance, distance_ranges, base_price):
+    with pytest.raises(HTTPException) as exception_info:
+        get_delivery_fee(base_price, out_of_bounds_distance, distance_ranges)
+    assert exception_info.value.status_code == 400
+    assert exception_info.value.detail == "Distance exceeds maximum permissible limit."

@@ -43,7 +43,7 @@ def delivery_order_price(*, venue_slug: str, cart_value: int, user_lat: float, u
     }
 
 
-def get_distance(venue_coordinates: list, user_coordinates: list) -> int:
+def get_distance(venue_coordinates: tuple, user_coordinates: tuple) -> int:
     """
     The function uses the Haversine formula to calculate the distance between
     two points using their coordinates (latitude and longitude).
