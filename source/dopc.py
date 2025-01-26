@@ -187,7 +187,7 @@ def get_total_price(cart_value: int, small_order_surcharge: int, delivery_fee: i
         )
 
     if delivery_fee < 0:
-        errors["delivery_fee"] = "delivery fee can't be negative"
+        errors["delivery_fee_error"] = "delivery fee can't be negative"
 
     if errors:
         raise HTTPException(status_code=400, detail=errors)
