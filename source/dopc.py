@@ -1,14 +1,14 @@
 from fastapi import FastAPI, HTTPException
 import requests
 import math
-from delivery_price_logic import (
+from source.delivery_price_logic import (
     get_delivery_fee,
     extract_venue_coordinates,
     get_distance,
     get_small_order_surcharge,
     get_total_price,
 )
-from venue_client import get_venue_data
+from source.venue_client import get_venue_data
 
 app = FastAPI()
 
