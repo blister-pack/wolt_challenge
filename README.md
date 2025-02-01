@@ -22,13 +22,10 @@ The instructions for the installation of and running of the program are as follo
 
 --- INSTRUCTIONS FOR RUNNING THE APP ---
 
-1. Navigate to source folder:
-    `cd source/`
+1. Start the FastAPI development server:
+    `uvicorn source.dopc:app --reload`
 
-2. Start the FastAPI development server:
-    `uvicorn dopc:app --reload`
-
-3. Open browser and navigate to:
+2. Open browser and navigate to:
     `http://127.0.0.1:8000/docs` (default)
     Here you should be able to explore and test the API
 
