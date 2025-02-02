@@ -49,3 +49,15 @@ Valid inputs returning expected results.
 Edge cases such as missing or invalid parameters.
 Dependency failures, raising appropriate exceptions.
 This testing strategy would ensure the endpoint behaves as expected under different conditions.
+
+
+--- HOW TO RUN COVERAGE ---
+
+Coverage is cool because it tests how much of the code is actually ran with your tests.
+
+how to use coverage:
+1. Run your tests with coverage
+`coverage run -m pytest tests/`
+
+2. Check coverage:
+`coverage report`

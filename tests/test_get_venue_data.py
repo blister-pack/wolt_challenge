@@ -30,23 +30,80 @@ dynamic_success_response = {
 
 
 @mock.patch("requests.get")
-def test_gvd_static_fail():
-    pass
+def test_gvd_static_fail(mock_get):
+    mock_static_fail = mock.Mock()
+    mock_static_fail.status_code = 402
+
+    mock_dynamic = mock.Mock()
+    mock_dynamic.status_code = 200
+    mock_dynamic.json.return_value = dynamic_success_response
+
+    mock_get.side_effect = [mock_static_fail, mock_dynamic]
+
+    with pytest.raises(HTTPException) as exc:
+        get_venue_data("test_venue")
+    assert exc.value.status_code == 400
+    assert exc.value.detail == {
+        "static_data_error": "Static data request failed with status code 402"
+    }
 
 
 @mock.patch("requests.get")
-def test_gvd_dynamic_fail():
-    pass
+def test_gvd_dynamic_fail(mock_get):
+    mock_static = mock.Mock()
+    mock_static.status_code = 200
+    mock_static.json.return_value = static_success_response
+
+    mock_dynamic_fail = mock.Mock()
+    mock_dynamic_fail.status_code = 402
+
+    mock_get.side_effect = [mock_static, mock_dynamic_fail]
+
+    with pytest.raises(HTTPException) as exc:
+        get_venue_data("test_venue")
+    assert exc.value.status_code == 400
+    assert exc.value.detail == {
+        "dynamic_data_error": "Dynamic data request failed with status code 402"
+    }
 
 
 @mock.patch("requests.get")
-def test_gvd_static_and_dynamic_fail():
-    pass
+def test_gvd_static_and_dynamic_fail(mock_get):
+    mock_static_fail = mock.Mock()
+    mock_static_fail.status_code = 402
+
+    mock_dynamic_fail = mock.Mock()
+    mock_dynamic_fail.status_code = 402
+
+    mock_get.side_effect = [mock_static_fail, mock_dynamic_fail]
+
+    with pytest.raises(HTTPException) as exc:
+        get_venue_data("test_venue")
+    assert exc.value.status_code == 400
+    assert exc.value.detail == {
+        "static_data_error": "Static data request failed with status code 402",
+        "dynamic_data_error": "Dynamic data request failed with status code 402",
+    }
 
 
 @mock.patch("requests.get")
-def test_gvd_KeyError():
-    pass
+def test_gvd_KeyError(mock_get):
+    mock_static = mock.Mock()
+    mock_static.status_code = 200
+    mock_static.json.return_value = {"venue_raw": {}}
+
+    mock_dynamic = mock.Mock()
+    mock_dynamic.status_code = 200
+    mock_dynamic.json.return_value = dynamic_success_response
+
+    mock_get.side_effect = [mock_static, mock_dynamic]
+
+    with pytest.raises(HTTPException) as exc:
+        get_venue_data("test_venue")
+
+    assert exc.value.status_code == 400
+    assert "Missing key" in exc.value.detail
+    assert exc.value.detail == "Missing key in API response 'location'"
 
 
 @mock.patch("requests.get")
