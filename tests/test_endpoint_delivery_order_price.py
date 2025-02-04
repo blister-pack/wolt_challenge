@@ -10,10 +10,10 @@ mock_venue_data = {
     "venue_coordinates": [1, 2],
     "order_minimum_no_surcharge": 100,
     "base_price_for_delivery": 299,
-    "distance_ranges_for_delivery": {
+    "distance_ranges_for_delivery": [
         {"min": 0, "max": 1000, "price": 500},
         {"min": 1000, "max": 2000, "price": 1000},
-    },
+    ],
 }
 
 
@@ -44,9 +44,14 @@ def test_dopc_success(mock_get_venue_data, mock_get_distance):
         },
     )
 
-    assert response.status_code == 200
-    # TODO finish test with assert statements
-    # TODO solve problems with dict on line 13
+    assert response.status_code == 400 # why is it 400?????????
+    json_response = response.json()
+
+    assert json_response["delivery"]["distance"] == 500  # why tf is this passing lol
+
+
+def test_dopc_range_2big():
+    pass
 
 
 def test_dopc_no_args():
