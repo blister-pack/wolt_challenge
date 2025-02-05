@@ -34,6 +34,7 @@ The instructions for the installation of and running of the program are as follo
 
 1. Run tests:
     `pytest tests/`
+    `pytest -s tests/` allows print statements!
 
 used coordinates for testing:
 
