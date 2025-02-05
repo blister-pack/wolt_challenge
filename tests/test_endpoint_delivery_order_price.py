@@ -14,6 +14,7 @@ mock_venue_data = {
     "distance_ranges_for_delivery": [
         {"min": 0, "max": 1000},
         {"min": 1000, "max": 2000},
+        {"min": 2000, "max": 0},
     ],
 }
 
@@ -22,15 +23,36 @@ def mock_get_venue_data(venue_slug):
     return mock_venue_data
 
 
-@mock.patch("source.dopc.get_total_price")
-@mock.patch("source.dopc.get_small_order_surcharge")
-@mock.patch("source.dopc.extract_venue_coordinates")
-@mock.patch("source.dopc.get_delivery_fee")
-@mock.patch("source.dopc.get_distance")
+def mock_get_distance(venue_coords, user_coords):
+    return 500
+
+
+def mock_get_delivery_fee(base_price, distance, distance_ranges):
+    return 200
+
+
+def mock_extr_venue_coordinates(venue_coordinates_list):
+    return (1, 2)
+
+
+def mock_get_small_order_surcharge(order_minimum_no_surcharge, cart_value):
+    return 300
+
+
+def mock_get_total_price(cart_value, small_order_surcharge, delivery_fee):
+    return 1000
+
+
+@mock.patch("source.dopc.get_total_price", side_effect=mock_get_total_price)
 @mock.patch(
-    target="source.dopc.get_venue_data",
-    side_effect=mock_get_venue_data,
+    "source.dopc.get_small_order_surcharge", side_effect=mock_get_small_order_surcharge
 )
+@mock.patch(
+    "source.dopc.extract_venue_coordinates", side_effect=mock_extr_venue_coordinates
+)
+@mock.patch("source.dopc.get_delivery_fee", side_effect=mock_get_delivery_fee)
+@mock.patch("source.dopc.get_distance", side_effect=mock_get_distance)
+@mock.patch("source.dopc.get_venue_data", side_effect=mock_get_venue_data)
 def test_dopc_success(
     mock_get_venue_data,
     mock_get_distance,
@@ -39,12 +61,6 @@ def test_dopc_success(
     mock_get_small_order_surcharge,
     mock_get_total_price,
 ):
-    mock_get_delivery_fee.return_value = 100
-    mock_get_distance.return_value = 500
-    mock_get_delivery_fee.return_value = 200
-    mock_extract_venue_coordinates.return_value = (1, 2)
-    mock_get_small_order_surcharge.return_value = 300
-    mock_get_total_price.return_value = 1000
 
     response = client.get(
         "/api/v1/delivery-order-price",
@@ -55,18 +71,59 @@ def test_dopc_success(
             "user_lon": 4,
         },
     )
-    mock_get_venue_data.assert_called_once_with("test_venue")
     assert response.status_code == 200
     json_response = response.json()
-    print("Error detail: ", json_response.get("detail"))
-    print("Full JSON: ", json_response)
-    print("Mock venue data returned:", mock_get_venue_data("test_venue"))
 
-    assert json_response["delivery"]["distance"] == 500
+    assert json_response == {
+        "total_price": 1000,
+        "small_order_surcharge": 300,
+        "cart_value": 1500,
+        "delivery": {
+            "fee": 200,
+            "distance": 500,
+        },
+    }
+
+    # ----- SOME USEFUL COMMANDS -----
+    # mock_get_venue_data.assert_called_once_with("test_venue")
+    # print("Error detail: ", json_response.get("detail"))
+    # print("Full JSON: ", json_response)
+    # print("Mock venue data returned:", mock_get_venue_data("test_venue"))
+    # ---------------------------------
 
 
-def test_dopc_range_2big():
-    pass
+@mock.patch("source.dopc.get_total_price", side_effect=mock_get_total_price)
+@mock.patch(
+    "source.dopc.get_small_order_surcharge", side_effect=mock_get_small_order_surcharge
+)
+@mock.patch(
+    "source.dopc.extract_venue_coordinates", side_effect=mock_extr_venue_coordinates
+)
+@mock.patch("source.dopc.get_delivery_fee", side_effect=mock_get_delivery_fee)
+@mock.patch("source.dopc.get_distance")
+@mock.patch("source.dopc.get_venue_data", side_effect=mock_get_venue_data)
+def test_dopc_range_2big(
+    mock_get_venue_data,
+    mock_get_distance,
+    mock_get_delivery_fee,
+    mock_extract_venue_coordinates,
+    mock_get_small_order_surcharge,
+    mock_get_total_price,
+):
+    mock_get_distance.return_value = 3000 # out of bounds
+
+    response = client.get(
+        "/api/v1/delivery-order-price",
+        params={
+            "venue_slug": "test_venue",
+            "cart_value": 1500,
+            "user_lat": 3,
+            "user_lon": 4,
+        },
+    )
+    
+    assert response.status_code == 400
+    # TODO test gives 200 and is supposed to fail
 
 
 # def test_dopc_no_args():
