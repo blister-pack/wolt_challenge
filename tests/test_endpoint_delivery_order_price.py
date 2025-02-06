@@ -57,7 +57,7 @@ def mock_dependencies(
 ):
     used_mocks = []
 
-    if mock_get_total_price:
+    if mock_total_price:
         used_mocks.append(
             mock.patch("source.dopc.get_total_price", side_effect=mock_get_total_price)
         )
@@ -101,7 +101,7 @@ def mock_dependencies(
         yield used_mocks
 
 
-def test_dopc_success_context():
+def test_dopc_success():
     with mock_dependencies():
         response = client.get(
             "/api/v1/delivery-order-price",
@@ -131,33 +131,19 @@ def test_dopc_success_context():
     # ---------------------------------
 
 
-@mock.patch("source.dopc.get_total_price", side_effect=mock_get_total_price)
-@mock.patch(
-    "source.dopc.get_small_order_surcharge", side_effect=mock_get_small_order_surcharge
-)
-@mock.patch(
-    "source.dopc.extract_venue_coordinates", side_effect=mock_extr_venue_coordinates
-)
 @mock.patch("source.dopc.get_distance")
-@mock.patch("source.dopc.get_venue_data", side_effect=mock_get_venue_data)
-def test_dopc_range_2big(
-    mock_get_venue_data,
-    mock_get_distance,
-    mock_extract_venue_coordinates,
-    mock_get_small_order_surcharge,
-    mock_get_total_price,
-):
+def test_distance2big_context(mock_get_distance):
     mock_get_distance.return_value = 3000  # out of bounds
-
-    response = client.get(
-        "/api/v1/delivery-order-price",
-        params={
-            "venue_slug": "test_venue",
-            "cart_value": 1500,
-            "user_lat": 3,
-            "user_lon": 4,
-        },
-    )
+    with mock_dependencies(mock_delivery_fee=False, mock_distance=False):
+        response = client.get(
+            "/api/v1/delivery-order-price",
+            params={
+                "venue_slug": "test_venue",
+                "cart_value": 1500,
+                "user_lat": 3,
+                "user_lon": 4,
+            },
+        )
 
     assert response.status_code == 400
     json_response = response.json()
