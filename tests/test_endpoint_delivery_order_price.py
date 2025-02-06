@@ -47,28 +47,53 @@ def mock_get_total_price(cart_value, small_order_surcharge, delivery_fee):
 
 
 @contextlib.contextmanager
-def mock_dependencies(*patch_ids):
-    mock_index = {
-        1: mock.patch("source.dopc.get_total_price", side_effect=mock_get_total_price),
-        2: mock.patch(
-            "source.dopc.get_small_order_surcharge",
-            side_effect=mock_get_small_order_surcharge,
-        ),
-        3: mock.patch(
-            "source.dopc.extract_venue_coordinates",
-            side_effect=mock_extr_venue_coordinates,
-        ),
-        4: mock.patch(
-            "source.dopc.get_delivery_fee", side_effect=mock_get_delivery_fee
-        ),
-        5: mock.patch("source.dopc.get_distance", side_effect=mock_get_distance),
-        6: mock.patch("source.dopc.get_venue_data", side_effect=mock_get_venue_data),
-    }
-
+def mock_dependencies(
+    mock_total_price=True,
+    mock_small_order_surcharge=True,
+    mock_venue_coordinates=True,
+    mock_delivery_fee=True,
+    mock_distance=True,
+    mock_venue_data=True,
+):
     used_mocks = []
 
-    for id in patch_ids:
-        used_mocks.append(mock_index[id])
+    if mock_get_total_price:
+        used_mocks.append(
+            mock.patch("source.dopc.get_total_price", side_effect=mock_get_total_price)
+        )
+
+    if mock_small_order_surcharge:
+        used_mocks.append(
+            mock.patch(
+                "source.dopc.get_small_order_surcharge",
+                side_effect=mock_get_small_order_surcharge,
+            )
+        )
+
+    if mock_venue_coordinates:
+        used_mocks.append(
+            mock.patch(
+                "source.dopc.extract_venue_coordinates",
+                side_effect=mock_extr_venue_coordinates,
+            )
+        )
+
+    if mock_delivery_fee:
+        used_mocks.append(
+            mock.patch(
+                "source.dopc.get_delivery_fee", side_effect=mock_get_delivery_fee
+            )
+        )
+
+    if mock_distance:
+        used_mocks.append(
+            mock.patch("source.dopc.get_distance", side_effect=mock_get_distance)
+        )
+
+    if mock_venue_data:
+        used_mocks.append(
+            mock.patch("source.dopc.get_venue_data", side_effect=mock_get_venue_data)
+        )
 
     with contextlib.ExitStack() as stack:
         for m in used_mocks:
@@ -77,7 +102,7 @@ def mock_dependencies(*patch_ids):
 
 
 def test_dopc_success_context():
-    with mock_dependencies(1, 2, 3, 4, 5, 6):
+    with mock_dependencies():
         response = client.get(
             "/api/v1/delivery-order-price",
             params={
@@ -137,9 +162,6 @@ def test_dopc_range_2big(
     assert response.status_code == 400
     json_response = response.json()
     assert "Distance exceeds maximum permissible limit." == json_response["detail"]
-
-
-
 
 
 # def test_dopc_no_args():
