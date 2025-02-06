@@ -1,9 +1,12 @@
+from urllib import response
+import pytest
 from source.delivery_price_logic import get_delivery_fee
 from source.dopc import app
 from fastapi.testclient import TestClient
 import unittest.mock as mock
 from fastapi import HTTPException
 from source.venue_client import get_venue_data
+import contextlib
 
 client = TestClient(app)
 
@@ -43,38 +46,49 @@ def mock_get_total_price(cart_value, small_order_surcharge, delivery_fee):
     return 1000
 
 
-@mock.patch("source.dopc.get_total_price", side_effect=mock_get_total_price)
-@mock.patch(
-    "source.dopc.get_small_order_surcharge", side_effect=mock_get_small_order_surcharge
-)
-@mock.patch(
-    "source.dopc.extract_venue_coordinates", side_effect=mock_extr_venue_coordinates
-)
-@mock.patch("source.dopc.get_delivery_fee", side_effect=mock_get_delivery_fee)
-@mock.patch("source.dopc.get_distance", side_effect=mock_get_distance)
-@mock.patch("source.dopc.get_venue_data", side_effect=mock_get_venue_data)
-def test_dopc_success(
-    mock_get_venue_data,
-    mock_get_distance,
-    mock_get_delivery_fee,
-    mock_extract_venue_coordinates,
-    mock_get_small_order_surcharge,
-    mock_get_total_price,
-):
+@contextlib.contextmanager
+def mock_dependencies(*patch_ids):
+    mock_index = {
+        1: mock.patch("source.dopc.get_total_price", side_effect=mock_get_total_price),
+        2: mock.patch(
+            "source.dopc.get_small_order_surcharge",
+            side_effect=mock_get_small_order_surcharge,
+        ),
+        3: mock.patch(
+            "source.dopc.extract_venue_coordinates",
+            side_effect=mock_extr_venue_coordinates,
+        ),
+        4: mock.patch(
+            "source.dopc.get_delivery_fee", side_effect=mock_get_delivery_fee
+        ),
+        5: mock.patch("source.dopc.get_distance", side_effect=mock_get_distance),
+        6: mock.patch("source.dopc.get_venue_data", side_effect=mock_get_venue_data),
+    }
 
-    response = client.get(
-        "/api/v1/delivery-order-price",
-        params={
-            "venue_slug": "test_venue",
-            "cart_value": 1500,
-            "user_lat": 3,
-            "user_lon": 4,
-        },
-    )
+    used_mocks = []
+
+    for id in patch_ids:
+        used_mocks.append(mock_index[id])
+
+    with contextlib.ExitStack() as stack:
+        for m in used_mocks:
+            stack.enter_context(m)
+        yield used_mocks
+
+
+def test_dopc_success_context():
+    with mock_dependencies(1, 2, 3, 4, 5, 6):
+        response = client.get(
+            "/api/v1/delivery-order-price",
+            params={
+                "venue_slug": "test_venue",
+                "cart_value": 1500,
+                "user_lat": 3,
+                "user_lon": 4,
+            },
+        )
     assert response.status_code == 200
-    json_response = response.json()
-
-    assert json_response == {
+    assert response.json() == {
         "total_price": 1000,
         "small_order_surcharge": 300,
         "cart_value": 1500,
@@ -99,18 +113,16 @@ def test_dopc_success(
 @mock.patch(
     "source.dopc.extract_venue_coordinates", side_effect=mock_extr_venue_coordinates
 )
-@mock.patch("source.dopc.get_delivery_fee", side_effect=mock_get_delivery_fee)
 @mock.patch("source.dopc.get_distance")
 @mock.patch("source.dopc.get_venue_data", side_effect=mock_get_venue_data)
 def test_dopc_range_2big(
     mock_get_venue_data,
     mock_get_distance,
-    mock_get_delivery_fee,
     mock_extract_venue_coordinates,
     mock_get_small_order_surcharge,
     mock_get_total_price,
 ):
-    mock_get_distance.return_value = 3000 # out of bounds
+    mock_get_distance.return_value = 3000  # out of bounds
 
     response = client.get(
         "/api/v1/delivery-order-price",
@@ -121,9 +133,13 @@ def test_dopc_range_2big(
             "user_lon": 4,
         },
     )
-    
+
     assert response.status_code == 400
-    # TODO test gives 200 and is supposed to fail
+    json_response = response.json()
+    assert "Distance exceeds maximum permissible limit." == json_response["detail"]
+
+
+
 
 
 # def test_dopc_no_args():
